@@ -236,6 +236,11 @@ def bufferbloat():
             ctimes.append(curl_time)
             ccount += 1
     
+    with open('%s/download.txt' % (args.dir), 'w') as f:
+        for ctime in ctimes:
+            f.write("%s\n" % ctime)
+        print "done writing download times for %s" % args.dir
+
     # need mean to compute std dev
     for ctime in ctimes:
         std += ((csum / ccount) - float(ctime)) ** 2

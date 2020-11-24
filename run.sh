@@ -8,7 +8,8 @@ time=60
 bwnet=10
 # TODO: If you want the RTT to be 4ms what should the delay on each
 # link be?  Set this value correctly.
-delay=1
+# delay = 4ms / 4 = 1ms
+delay=1 # link propagation delay
 
 iperf_port=5001
 
@@ -28,4 +29,5 @@ for qsize in 5 20 100; do
     python plot_tcpprobe.py -f $dir/cwnd.txt -o $dir/cwnd-iperf.png -p $iperf_port
     python plot_queue.py -f $dir/q.txt -o $dir/q.png
     python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png
+    python plot_download_time.py -f $dir/download.txt -o $dir/download.png
 done
