@@ -1,0 +1,66 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{datetime}
+\usepackage[T1]{fontenc}
+\usepackage{titling}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+\titleformat{\section}[runin]
+  {\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}[runin]
+  {\normalfont\large\bfseries}{\thesubsection}{1em}{}
+  
+\renewcommand{\thesection}{\Roman{section}} 
+\renewcommand{\thesubsection}{\thesection.\Roman{subsection}}
+
+\makeatletter
+
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+\begin{flushleft}
+  \textbf{\Large \@title}\newline
+  
+  \@author\\
+  Date: \@date
+\end{flushleft}\egroup
+}
+\makeatother
+
+\author{Author: Tingfeng Xia, University of Toronto, \url{tingfeng.xia@mail.utoronto.ca}}
+\title{\textbf{Buffer Bloat Problem} \\ {\small CSC458 Computer Networks Programming Assignment 2}}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+\section{Abstract} 
+
+
+
+%A discussion of what the buffer bloat problem is here. The impact of buffer bloat for users. In this programming assignment, I will examine the 
+
+
+
+
+
+\section{Methods} 
+The simulation setup here
+
+
+
+
+
+\section{Results}
+
+
+
+
+
+\section{Discussion}
+
+
+
+
+\section{References}
+
+\end{document}
