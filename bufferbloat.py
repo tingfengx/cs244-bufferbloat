@@ -22,6 +22,8 @@ import sys
 import os
 import math
 
+from helper import avg, stdev
+
 # TODO: Don't just read the TODO sections in this code.  Remember that
 # one of the goals of this assignment is for you to learn how to use
 # Mininet. :-)
@@ -199,20 +201,19 @@ def bufferbloat():
     # Hint: have a separate function to do this and you may find the
     # loop below useful.
 
-    def do_curl(net, save_file):
-        h1 = net.get('h1')
-        h2 = net.get('h2')
-        popen = h2.popen(
-            "curl -o /dev/null -s -w %%{time_total} %s/http/index.html > %s/%s" % (h1.IP(), args.dir, save_file), 
-            shell=True
-        )
-
+    
+    curl_times = []
+    popens = []
+    h1 = net.get('h1')
+    h2 = net.get('h2')
     start_time = time()
-    i = 0
     while True:
         # do the measurement (say) 3 times.
-        do_curl(net, 'curl_%d.txt' % i)
-        i += 1
+        popen = h2.popen(
+            "curl -o /dev/null -s -w %%{time_total} %s/http/index.html" % h1.IP()
+        )
+        # note: communicate()[0] here will hurt the performance
+        popens.append(popen)
         sleep(1)
         now = time()
         delta = now - start_time
@@ -223,29 +224,16 @@ def bufferbloat():
     # TODO: compute average (and standard deviation) of the fetch
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
-    std = 0
-    csum = 0
-    ccount = 0
-    ctimes = []
 
-    for i in range(args.time):
-        curl_file = open('%s/curl_%d.txt' % (args.dir, i), 'r')
-        curl_time = curl_file.readline();
-        if (curl_time):
-            csum += float(curl_time)
-            ctimes.append(curl_time)
-            ccount += 1
+    # have to do this, otherwise performance really bad
+    curl_times = [float(i.communicate()[0]) for i in popens]
     
     with open('%s/download.txt' % (args.dir), 'w') as f:
-        for ctime in ctimes:
+        for ctime in curl_times:
             f.write("%s\n" % ctime)
         print "done writing download times for %s" % args.dir
 
-    # need mean to compute std dev
-    for ctime in ctimes:
-        std += ((csum / ccount) - float(ctime)) ** 2
-
-    print "mean = %.5f, stddev = %.5f" % (csum / ccount, math.sqrt(std / ccount))
+    print "mean = %.5f, stddev = %.5f" % (avg(curl_times), stdev(curl_times))
 
     stop_tcpprobe()
     if qmon is not None:
