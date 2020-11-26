@@ -11,6 +11,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{float}
+\usepackage{booktabs}
 \usepackage[parfill]{parskip}
 
 \titleformat{\section}[runin]
@@ -43,52 +44,42 @@
 \section*{Abstract} 
 Bufferbloat refers to the existence of excessively large and frequently full buffers inside a network. \cite{sivov12} 
 
-Most TCP congestion control algorithms rely on packet drops to determine the available bandwidth between two ends of a connection.\cite{allman09, sayad11} In general, TCP congestion control algorithms speed up the data transfer until packets start to drop, then slow down the transmission rate. Under ideal conditions, we expect an equilibrium speed to be reached after a period of time of adjustments.
+Most TCP congestion control algorithms rely on packet drops to determine the available bandwidth between two ends of a connection.\cite{allman09, sayad11} In general, TCP congestion control algorithms speed up the data transfer (via increasing congestion window size) until packets start to drop, then slow down the transmission rate. Under ideal conditions, we expect an equilibrium speed to be reached after a period of time of adjustments.
 
-To illustrate the problem of Bufferbloat, let's consider an internet topology illustrated in Figure \ref{fig;topology}. From our perspective, $h_1$ to $s_0$ via $\ell_1$ should be sending at maximum 10Mbps to avoid congestion, since $\ell_2$ is the bottleneck in our network with a link speed of 10Mbps. However, from $h_1$'s perspective, it only knows to decrease data transfer speed when it  receives signal of packet drop, which will happen after the buffer of $s_0$ is full. Importantly, $h_1$ will not slow down its data transfer speed until $s_0$  buffer is saturated and $s_0$ begins to drop packets from $h_1$. In other words, the buffer within $s_0$ caused packet drop signals cease to be a timely indication of congestion, which TCP congestion avoidance algorithms rely heavily on. 
+In a fast to slow transition hop, bufferbloat can easily occur. Let's consider the internet topology illustrated in the assignment handout (Assignment Topology). TCP will continue to increase the cwnd size since packets sent out are being buffered inside the intermediate router $s_0$ and with no packet being dropped. It will only decrease the cwnd size when buffer of $s_0$ is saturated, but that is already too late. In other words, the buffer in the intermediate router has turned the packet drops into an \textbf{un-timely} indication of congestion, which is bad since TCP rely on timely communication of congestion via packet drops. 
 
 Bufferbloat causes increase in queueing delay, and thus causes end users to experience increase in latency, which is the sum of transmission delay, processing delay, and queueing delay. \cite{sivov12} Bufferbloat also causes jitters and decreases the overall throughput of the network. 
-
-\begin{figure}[h]
-	\begin{center}
-	\begin{tikzpicture}[scale=0.2]
-	\tikzstyle{every node}+=[inner sep=0pt]
-	\draw [black] (3.2,-3.2) circle (3);
-	\draw (3.2,-3.2) node {$h_1$};
-	\draw [black] (18.1,-3.2) circle (3);
-	\draw (18.1,-3.2) node {$s_0$};
-	\draw [black] (32.9,-3.2) circle (3);
-	\draw (32.9,-3.2) node {$h_2$};
-	\draw [black] (6.2,-3.2) -- (15.1,-3.2);
-	\fill [black] (15.1,-3.2) -- (14.3,-2.7) -- (14.3,-3.7);
-	\draw (10.65,-3.7) node [below] {$\ell_1$(1Gbps)};
-	\draw [black] (21.1,-3.2) -- (29.9,-3.2);
-	\fill [black] (29.9,-3.2) -- (29.1,-2.7) -- (29.1,-3.7);
-	\draw (25.5,-3.7) node [below] {$\ell_2$(10Mbps)};
-	\end{tikzpicture}
-	\end{center}
-	\captionsetup{format=hang}
-	\caption{\label{fig;topology}Assignment Topology. Link $\ell_1$ and $\ell_2$ has bandwidths 1Gbps and 10Mbps respectively; Router $s_0$ has buffer size 150kB, and assuming MTU of 1500 bytes it can buffer approximately 100 packets. }
-\end{figure}
 \section*{Methods} 
-We emulate our Assignment topology, as illustrated in Figure \ref{fig;topology}, internet topology using mininet. Then, we simultaneously perform the following three tasks
+We emulate our Assignment topology using mininet. Then, we simultaneously perform the following three tasks
 \begin{itemize}
 	\setlength\itemsep{-0.5em}
 	\item start a long lived TCP flow sending data from $h_1$ to $h_2$, and
 	\item send 1 ping per 0.1 second from $h_1$ to $h_2$, and 
 	\item spawn an web server on $h_1$, and download the webpage from $h_1$ once every two seconds. 
 \end{itemize}
-This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $ pkts. Then, for each max queue size, we plot the time-series of the long-lived TCP flow's cwrd, the RTT reported by ping, the webpage download time, and the queue size at the router $s_0$. 
+This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $ pkts. Then, for each max queue size, we plot the time-series of the long-lived TCP flow's cwnd, the RTT reported by ping, the webpage download time, and the queue size at the router $s_0$. 
 
 \section*{Results}
-\begin{figure}[H]
+Figures 
+
+\begin{table}[]
+	\center
+	\begin{tabular}{|c||c|c|c|}
+	\toprule
+	Queue Size                     & 5                            & 20                           & 100                          \\ \midrule \midrule
+	Mean(ms) & 0.67138 & 0.50437 & 1.27632 \\ \midrule
+	Stddev(ms)                     & 0.54124                      & 0.12420                      & 0.54989                      \\ \bottomrule
+	\end{tabular}
+	\caption{\label{tab:mean and std} Mean and standard deviation in fetch time for all three experiments. }
+\end{table}
+\begin{figure}
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q5/cwnd-iperf}
-		\caption{\label{fig:buffer5cwrd}Long-lived TCP flow's cwrd}
+		\caption{\label{fig:buffer5cwnd}Long-lived TCP flow's cwnd}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.49\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q5/rtt}
-		\caption{\label{fig:buffer5rtt}RTT repoted by ping}
+		\caption{\label{fig:buffer5rtt}RTT reported by ping}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q5/download}
@@ -99,16 +90,16 @@ This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $
 		\caption{\label{fig:buffer5q}Queue size at the router}
 	\end{subfigure}
 	\captionsetup{format=hang}
-	\caption{\label{fig:buffer5}Long-lived TCP flow's cwrd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 5. }
+	\caption{\label{fig:buffer5}Long-lived TCP flow's cwnd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 5. }
 \end{figure}
-\begin{figure}[H]
+\begin{figure}
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q20/cwnd-iperf}
-		\caption{\label{fig:buffer20cwrd}Long-lived TCP flow's cwrd}
+		\caption{\label{fig:buffer20cwnd}Long-lived TCP flow's cwnd}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.49\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q20/rtt}
-		\caption{\label{fig:buffer20rtt}RTT repoted by ping}
+		\caption{\label{fig:buffer20rtt}RTT reported by ping}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q20/download}
@@ -119,16 +110,16 @@ This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $
 		\caption{\label{fig:buffer20q}Queue size at the router}
 	\end{subfigure}
 	\captionsetup{format=hang}
-	\caption{\label{fig:buffer20}Long-lived TCP flow's cwrd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 20. }
+	\caption{\label{fig:buffer20}Long-lived TCP flow's cwnd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 20. }
 \end{figure}
-\begin{figure}[H]
+\begin{figure}
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q100/cwnd-iperf}
-		\caption{\label{fig:buffer100cwrd}Long-lived TCP flow's cwrd}
+		\caption{\label{fig:buffer100cwnd}Long-lived TCP flow's cwnd}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.49\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q100/rtt}
-		\caption{\label{fig:buffer100rtt}RTT repoted by ping}
+		\caption{\label{fig:buffer100rtt}RTT reported by ping}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q100/download}
@@ -139,7 +130,7 @@ This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $
 		\caption{\label{fig:buffer100q}Queue size at the router}
 	\end{subfigure}
 	\captionsetup{format=hang}
-	\caption{\label{fig:buffer100}Long-lived TCP flow's cwrd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 100. }
+	\caption{\label{fig:buffer100}Long-lived TCP flow's cwnd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 100. }
 \end{figure}
 
 
@@ -154,7 +145,12 @@ This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $
 
 
 
-
+For the sake of mitigating the bufferbloat problem, we can try 
+\begin{itemize}
+	\setlength\itemsep{-0.5em}
+	\item The probably simplest approach is to decrease the buffer sizes at each hop. This way, when congestion happen, buffers fill up quickly, and then rely on packet drops as a timely indication of congestion. This approach is, however, not optimal. We originally introduced buffers to deal with bursts of packets, and make networking more smooth in general. Reducing buffer size will cost us the ability to deal with bursts in the network. 
+	\item Use a delay based congestion avoidance algorithm rather than delay based. In this way, excessive buffering, even when there is no drop in packets, will signal that a congestion is occurring. We can then control the cwnd size based on this information. \cite{sivov12}
+\end{itemize}
 
 \bibliographystyle{apalike}
 \bibliography{bib.bib}
