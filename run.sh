@@ -31,3 +31,5 @@ for qsize in 5 20 100; do
     python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png
     python plot_download_time.py -f $dir/download.txt -o $dir/download.png
 done
+# finally do the following (plotting the relationship between RTT and qsize)
+python plot_relationship.py

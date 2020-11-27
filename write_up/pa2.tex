@@ -149,9 +149,10 @@ Ipconfig reports a maximum queue length of \texttt{txqueuelen:1000} packets, and
 	(1000 \times 1500 \times 8) / (100 \times 10^6) = 0.12\, \mathrm{second}
 \end{equation}
 
-
-
-\ul{How does the RTT reported by ping vary with the queue size? Write a symbolic equation to describe the relation between the two. Ignore the computation overheads in ping that might affect the final result.)}
+Figure \ref{fig:rtt q relationship} shows\footnote{This plot is generated with my script \texttt{plot\_relationship.py} available in the same directory as all the other plot python files. It is also automatically invoked in my modified version of \texttt{run.sh} script. You will need NumPy and Scipy.stats to run this script, I used them for the fitting of linear regression model.} the three data points that we have, which are pairs of queue size and the average RTT time taken reported by ping. On the plot, the coordinates are marked as text next to the data points. We than fit a linear regression model to our three data points, and then the fitted line is plotted on the same plot. We have reason to believe, with some allowance for error, that the relationship is linear and can be described as
+\begin{equation}
+	\mathrm{RTT (ms)} = 2 \times \mathrm{queue Size}
+\end{equation}
 
 For the sake of mitigating the bufferbloat problem, we can try 
 \begin{itemize}
@@ -161,11 +162,11 @@ For the sake of mitigating the bufferbloat problem, we can try
 \end{itemize}
 
 \begin{figure}[H]
-	\center\includegraphics[width=0.8\textwidth]{plot/fit}
+	\center\includegraphics[width=0.8\textwidth]{../fit}
 	\captionsetup{format=hang}
-	\caption{\label{fig:rtt q relationship}Scatter plot of RTT (in ms) and the max queue size used respectively. Plotted with the fitted line via linear regression. }
+	\caption{\label{fig:rtt q relationship}Scatter plot of RTT (in ms) and the max queue size used respectively. Plotted with the fitted line via linear regression. This plot is generated with my script \texttt{plot\_relationship.py} available in the same directory as all the other plot python files. It is also automatically invoked in my modified version of \texttt{run.sh} script. You will need NumPy and Scipy.stats to run this script, I used them for the fitting of linear regression model. }
 \end{figure}
-
+\newpage
 \bibliographystyle{apalike}
 \bibliography{bib.bib}
 
