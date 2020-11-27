@@ -68,7 +68,9 @@ This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $
 \section*{Results}
 Table \ref{tab:mean and std} provides an summary of mean and standard deviation of the fetch time in all three experiments with queue size 5, 20, and 100 pkts respectively, while Figures \ref{fig:buffer5}, \ref{fig:buffer20} and \ref{fig:buffer100} are plotted time-series for the long lived TCP flow's cwnd, RTT reported by ping, webpage fetch time, and queue size at the router. 
 
-\begin{table}
+Notice that here (as shown in Table \ref{tab:mean and std}) when queue size is 20, we have the lowest mean and standard deviation in the fetch time. While when buffer size is 100, we have the worst performance, both in terms of the mean fetch time and the standard deviation. When buffer size is 5, the performance is in between the other two experiments. I will explain why we are seeing this counter-intuitive\footnote{When we add a buffer, it is more intuitive to think that more buffer means better performance, or at least it should not hurt the performance. However, this is not the case with router buffers, and this is counter-intuitive. } case in my ``Discussion'' section below.
+
+\begin{table}[H]
 	\center
 	\begin{tabular}{|c||c|c|c|}
 	\toprule
@@ -79,7 +81,7 @@ Table \ref{tab:mean and std} provides an summary of mean and standard deviation 
 	\captionsetup{format=hang, singlelinecheck=false}
 	\caption{\label{tab:mean and std} Mean and standard deviation in fetch time for all three experiments. }
 \end{table}
-\begin{figure}
+\begin{figure}[H]
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q5/cwnd-iperf}
 		\caption{\label{fig:buffer5cwnd}Long-lived TCP flow's cwnd}
@@ -99,7 +101,7 @@ Table \ref{tab:mean and std} provides an summary of mean and standard deviation 
 	\captionsetup{format=hang}
 	\caption{\label{fig:buffer5}Long-lived TCP flow's cwnd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 5. }
 \end{figure}
-\begin{figure}
+\begin{figure}[H]
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q20/cwnd-iperf}
 		\caption{\label{fig:buffer20cwnd}Long-lived TCP flow's cwnd}
@@ -119,7 +121,7 @@ Table \ref{tab:mean and std} provides an summary of mean and standard deviation 
 	\captionsetup{format=hang}
 	\caption{\label{fig:buffer20}Long-lived TCP flow's cwnd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 20. }
 \end{figure}
-\begin{figure}
+\begin{figure}[H]
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q100/cwnd-iperf}
 		\caption{\label{fig:buffer100cwnd}Long-lived TCP flow's cwnd}
@@ -138,8 +140,7 @@ Table \ref{tab:mean and std} provides an summary of mean and standard deviation 
 	\end{subfigure}
 	\captionsetup{format=hang}
 	\caption{\label{fig:buffer100}Long-lived TCP flow's cwnd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 100. }
-\end{figure}
-
+\end{figure} 
 
 \section*{Discussion}
 Although the buffer is designed to smooth bursts out, it can hurt to have a buffer that is too large just the same as having a too small buffer. We illustrate this with the results we described in the ``Results'' section. When the queue size is 5, since the buffer is too small, packets get dropped frequently, and this is causing both a high delay and a high variance in this case. On the contrary when the max queue size is 100, the buffer size is too big, and this is causing bufferbloat to happen. Figure \ref{fig:buffer100q} illustrates that this big buffer is frequently (unnecessarily) full and seldomly empty, indicating the bufferbloat problem is occurring. When the max buffer size is 20, however, the buffer is neither too big nor too small; we see the lowest mean fetch time and standard deviation in all three experiments in this case. 
@@ -162,11 +163,11 @@ For the sake of mitigating the bufferbloat problem, we can try
 \end{itemize}
 
 \begin{figure}[H]
-	\center\includegraphics[width=0.8\textwidth]{../fit}
+	\center\includegraphics[width=0.9\textwidth]{../fit}
 	\captionsetup{format=hang}
 	\caption{\label{fig:rtt q relationship}Scatter plot of RTT (in ms) and the max queue size used respectively. Plotted with the fitted line via linear regression. This plot is generated with my script \texttt{plot\_relationship.py} available in the same directory as all the other plot python files. It is also automatically invoked in my modified version of \texttt{run.sh} script. You will need NumPy and Scipy.stats to run this script, I used them for the fitting of linear regression model. }
 \end{figure}
-\newpage
+%\newpage
 \bibliographystyle{apalike}
 \bibliography{bib.bib}
 
