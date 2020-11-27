@@ -8,11 +8,17 @@
 %\usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{soul}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{booktabs}
+\usepackage{pgfplots}
 \usepackage[parfill]{parskip}
+%\captionsetup{
+%	format=hang, 
+%    singlelinecheck=false
+%}
 
 \titleformat{\section}[runin]
   {\normalfont\Large\bfseries}{\thesection}{1em}{}
@@ -50,7 +56,7 @@ In a fast to slow transition hop, bufferbloat can easily occur. Let's consider t
 
 Bufferbloat causes increase in queueing delay, and thus causes end users to experience increase in latency, which is the sum of transmission delay, processing delay, and queueing delay. \cite{sivov12} Bufferbloat also causes jitters and decreases the overall throughput of the network. 
 \section*{Methods} 
-We emulate our Assignment topology using mininet. Then, we simultaneously perform the following three tasks
+We emulate our Assignment Topology using mininet. Then, we simultaneously perform the following three tasks
 \begin{itemize}
 	\setlength\itemsep{-0.5em}
 	\item start a long lived TCP flow sending data from $h_1$ to $h_2$, and
@@ -60,16 +66,17 @@ We emulate our Assignment topology using mininet. Then, we simultaneously perfor
 This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $ pkts. Then, for each max queue size, we plot the time-series of the long-lived TCP flow's cwnd, the RTT reported by ping, the webpage download time, and the queue size at the router $s_0$. 
 
 \section*{Results}
-Figures 
+Table \ref{tab:mean and std} provides an summary of mean and standard deviation of the fetch time in all three experiments with queue size 5, 20, and 100 pkts respectively, while Figures \ref{fig:buffer5}, \ref{fig:buffer20} and \ref{fig:buffer100} are plotted time-series for the long lived TCP flow's cwnd, RTT reported by ping, webpage fetch time, and queue size at the router. 
 
-\begin{table}[]
+\begin{table}
 	\center
 	\begin{tabular}{|c||c|c|c|}
 	\toprule
-	Queue Size                     & 5                            & 20                           & 100                          \\ \midrule \midrule
-	Mean(ms) & 0.67138 & 0.50437 & 1.27632 \\ \midrule
-	Stddev(ms)                     & 0.54124                      & 0.12420                      & 0.54989                      \\ \bottomrule
+	Queue Size & 5 & 20 & 100 \\ \midrule \midrule
+	Mean(ms) & 0.72167 & 0.48278 & 1.40365 \\ \midrule
+	Stddev(ms) & 0.47233 & 0.14989 & 0.71954 \\ \bottomrule
 	\end{tabular}
+	\captionsetup{format=hang, singlelinecheck=false}
 	\caption{\label{tab:mean and std} Mean and standard deviation in fetch time for all three experiments. }
 \end{table}
 \begin{figure}
@@ -135,15 +142,16 @@ Figures
 
 
 \section*{Discussion}
+Although the buffer is designed to smooth bursts out, it can hurt to have a buffer that is too large just the same as having a too small buffer. We illustrate this with the results we described in the ``Results'' section. When the queue size is 5, since the buffer is too small, packets get dropped frequently, and this is causing both a high delay and a high variance in this case. On the contrary when the max queue size is 100, the buffer size is too big, and this is causing bufferbloat to happen. Figure \ref{fig:buffer100q} illustrates that this big buffer is frequently (unnecessarily) full and seldomly empty, indicating the bufferbloat problem is occurring. When the max buffer size is 20, however, the buffer is neither too big nor too small; we see the lowest mean fetch time and standard deviation in all three experiments in this case. 
+
+Ipconfig reports a maximum queue length of \texttt{txqueuelen:1000} packets, and a MTU of 1500 bytes. Then, if we have a saturated buffer, we need
+\begin{equation}
+	(1000 \times 1500 \times 8) / (100 \times 10^6) = 0.12\, \mathrm{second}
+\end{equation}
 
 
 
-
-
-
-
-
-
+\ul{How does the RTT reported by ping vary with the queue size? Write a symbolic equation to describe the relation between the two. Ignore the computation overheads in ping that might affect the final result.)}
 
 For the sake of mitigating the bufferbloat problem, we can try 
 \begin{itemize}
@@ -151,6 +159,12 @@ For the sake of mitigating the bufferbloat problem, we can try
 	\item The probably simplest approach is to decrease the buffer sizes at each hop. This way, when congestion happen, buffers fill up quickly, and then rely on packet drops as a timely indication of congestion. This approach is, however, not optimal. We originally introduced buffers to deal with bursts of packets, and make networking more smooth in general. Reducing buffer size will cost us the ability to deal with bursts in the network. 
 	\item Use a delay based congestion avoidance algorithm rather than delay based. In this way, excessive buffering, even when there is no drop in packets, will signal that a congestion is occurring. We can then control the cwnd size based on this information. \cite{sivov12}
 \end{itemize}
+
+\begin{figure}[H]
+	\center\includegraphics[width=0.8\textwidth]{plot/fit}
+	\captionsetup{format=hang}
+	\caption{\label{fig:rtt q relationship}Scatter plot of RTT (in ms) and the max queue size used respectively. Plotted with the fitted line via linear regression. }
+\end{figure}
 
 \bibliographystyle{apalike}
 \bibliography{bib.bib}
