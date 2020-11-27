@@ -158,7 +158,7 @@ For the sake of mitigating the bufferbloat problem, we can try
 \begin{itemize}
 	\setlength\itemsep{-0.5em}
 	\item The probably simplest approach is to decrease the buffer sizes at each hop. This way, when congestion happen, buffers fill up quickly, and then rely on packet drops as a timely indication of congestion. This approach is, however, not optimal. We originally introduced buffers to deal with bursts of packets, and make networking more smooth in general. Reducing buffer size will cost us the ability to deal with bursts in the network. 
-	\item Use a delay based congestion avoidance algorithm rather than delay based. In this way, excessive buffering, even when there is no drop in packets, will signal that a congestion is occurring. We can then control the cwnd size based on this information. \cite{sivov12}
+	\item Use a delay based congestion avoidance algorithm rather than packet drop based. \cite{sivov12} In this way, if the delay is too high we know that the packet might have been buffered somewhere, signalling a congestion. We can then control the cwnd size based on this information
 \end{itemize}
 
 \begin{figure}[H]
