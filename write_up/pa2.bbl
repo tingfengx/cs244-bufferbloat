@@ -1,0 +1,19 @@
+\begin{thebibliography}{}
+
+\bibitem[Allman and Paxson, 2009]{allman09}
+Allman, M. and Paxson, V. (2009).
+\newblock Tcp congestion control.
+\newblock Rfc, RFC Editor.
+
+\bibitem[El-Sayed et~al., 2011]{sayad11}
+El-Sayed, A., HAGGAG, S., and EL-FESHAWY, N. (2011).
+\newblock A survey for mechanisms for tcp congestion control.
+\newblock {\em International Journal of Research and Reviews in Computer
+  Science (IJRRCS)}, 02:676--682.
+
+\bibitem[Sivov and Sokolov, 2012]{sivov12}
+Sivov, A. and Sokolov, V. (2012).
+\newblock The bufferbloat problem and tcp: Fighting with congestion and
+  latency.
+
+\end{thebibliography}

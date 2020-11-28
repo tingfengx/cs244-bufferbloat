@@ -8,10 +8,14 @@
 %\usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{multicol} % added package
 \usepackage{soul}
-\usepackage{caption}
+\usepackage{tcolorbox}
+%\usepackage{caption}
+\usepackage[font=footnotesize]{caption}
 \usepackage{subcaption}
 \usepackage{float}
+\usepackage{minted}
 \usepackage{booktabs}
 \usepackage{pgfplots}
 \usepackage[parfill]{parskip}
@@ -52,7 +56,7 @@ Bufferbloat refers to the existence of excessively large and frequently full buf
 
 Most TCP congestion control algorithms rely on packet drops to determine the available bandwidth between two ends of a connection.\cite{allman09, sayad11} In general, TCP congestion control algorithms speed up the data transfer (via increasing congestion window size) until packets start to drop, then slow down the transmission rate. Under ideal conditions, we expect an equilibrium speed to be reached after a period of time of adjustments.
 
-In a fast to slow transition hop, bufferbloat can easily occur. Let's consider the internet topology illustrated in the assignment handout (Assignment Topology). TCP will continue to increase the cwnd size since packets sent out are being buffered inside the intermediate router $s_0$ and with no packet being dropped. It will only decrease the cwnd size when buffer of $s_0$ is saturated, but that is already too late. In other words, the buffer in the intermediate router has turned the packet drops into an \textbf{un-timely} indication of congestion, which is bad since TCP rely on timely communication of congestion via packet drops. 
+In a fast to slow transition hop, bufferbloat can easily occur. Let's consider the internet topology illustrated in the assignment handout (Assignment Topology). TCP will continue to increase the cwnd size since packets sent out are being buffered inside the intermediate router $s_0$ and with no packet being dropped. It will only decrease the cwnd size when buffer of $s_0$ is saturated, but that is already too late. In other words, the buffer in the intermediate router has turned the packet drops into an \textbf{un-timely} indication of congestion, which is bad since TCP congestion control algorithms rely on timely communication of congestion via packet drops. 
 
 Bufferbloat causes increase in queueing delay, and thus causes end users to experience increase in latency, which is the sum of transmission delay, processing delay, and queueing delay. \cite{sivov12} Bufferbloat also causes jitters and decreases the overall throughput of the network. 
 \section*{Methods} 
@@ -68,20 +72,20 @@ This simulation is repeated for three different queue sizes, $Q = 5 / 20 / 100 $
 \section*{Results}
 Table \ref{tab:mean and std} provides an summary of mean and standard deviation of the fetch time in all three experiments with queue size 5, 20, and 100 pkts respectively, while Figures \ref{fig:buffer5}, \ref{fig:buffer20} and \ref{fig:buffer100} are plotted time-series for the long lived TCP flow's cwnd, RTT reported by ping, webpage fetch time, and queue size at the router. 
 
-Notice that here (as shown in Table \ref{tab:mean and std}) when queue size is 20, we have the lowest mean and standard deviation in the fetch time. While when buffer size is 100, we have the worst performance, both in terms of the mean fetch time and the standard deviation. When buffer size is 5, the performance is in between the other two experiments. I will explain why we are seeing this counter-intuitive\footnote{When we add a buffer, it is more intuitive to think that more buffer means better performance, or at least it should not hurt the performance. However, this is not the case with router buffers, and this is counter-intuitive. } case in my ``Discussion'' section below.
+%Notice that here (as shown in Table \ref{tab:mean and std}) as the queue size increases, we are seeing an increase in mean fetch time, monotonically. However, this is not the case for the standard deviation of the fetch time. 
 
-\begin{table}[H]
+\begin{table}
 	\center
 	\begin{tabular}{|c||c|c|c|}
 	\toprule
 	Queue Size & 5 & 20 & 100 \\ \midrule \midrule
-	Mean(ms) & 0.72167 & 0.48278 & 1.40365 \\ \midrule
-	Stddev(ms) & 0.47233 & 0.14989 & 0.71954 \\ \bottomrule
+	Mean(ms) & 0.67010 & 0.75517 & 1.25273 \\ \midrule
+	Stddev(ms) & 0.36301 & 0.20127 & 0.62726 \\ \bottomrule
 	\end{tabular}
 	\captionsetup{format=hang, singlelinecheck=false}
 	\caption{\label{tab:mean and std} Mean and standard deviation in fetch time for all three experiments. }
 \end{table}
-\begin{figure}[H]
+\begin{figure}
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q5/cwnd-iperf}
 		\caption{\label{fig:buffer5cwnd}Long-lived TCP flow's cwnd}
@@ -101,7 +105,7 @@ Notice that here (as shown in Table \ref{tab:mean and std}) when queue size is 2
 	\captionsetup{format=hang}
 	\caption{\label{fig:buffer5}Long-lived TCP flow's cwnd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 5. }
 \end{figure}
-\begin{figure}[H]
+\begin{figure}
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q20/cwnd-iperf}
 		\caption{\label{fig:buffer20cwnd}Long-lived TCP flow's cwnd}
@@ -121,7 +125,7 @@ Notice that here (as shown in Table \ref{tab:mean and std}) when queue size is 2
 	\captionsetup{format=hang}
 	\caption{\label{fig:buffer20}Long-lived TCP flow's cwnd, RTT reported by ping, webpage download time, and queue size at the router with max buffer size of 20. }
 \end{figure}
-\begin{figure}[H]
+\begin{figure}
 	\center\begin{subfigure}[b]{0.5\textwidth}
 		\includegraphics[width=\textwidth]{../bb-q100/cwnd-iperf}
 		\caption{\label{fig:buffer100cwnd}Long-lived TCP flow's cwnd}
@@ -143,17 +147,23 @@ Notice that here (as shown in Table \ref{tab:mean and std}) when queue size is 2
 \end{figure} 
 
 \section*{Discussion}
-Although the buffer is designed to smooth bursts out, it can hurt to have a buffer that is too large just the same as having a too small buffer. We illustrate this with the results we described in the ``Results'' section. When the queue size is 5, since the buffer is too small, packets get dropped frequently, and this is causing both a high delay and a high variance in this case. On the contrary when the max queue size is 100, the buffer size is too big, and this is causing bufferbloat to happen. Figure \ref{fig:buffer100q} illustrates that this big buffer is frequently (unnecessarily) full and seldomly empty, indicating the bufferbloat problem is occurring. When the max buffer size is 20, however, the buffer is neither too big nor too small; we see the lowest mean fetch time and standard deviation in all three experiments in this case. 
+Although the buffer is designed to smooth bursts out, it can hurt to have a buffer that is too large just the same as having no buffer at all. We illustrate this with the results we described in the ``Results'' section. 
+
+When the queue size is 5, the buffer is small. This means that we are unlikely to suffer from bufferbloat problem, but we are more likely to drop packets due to buffer out of space. This explains the high standard deviation for fetch time presented in \ref{tab:mean and std} when queue size is 5. On the contrary, when the queue size is set to 100, we have a high fetch time mean. In this case, bufferbloat is happening. Figure \ref{fig:buffer100q} illustrates the queue occupancy time-series at the router, and we can see that the buffer is unnecessarily full a lot of the time. When the max buffer is at 20, it is more balanced. Although the buffer is also leaning towards the saturated side, since the buffer size is small, we are seeing in Figures \ref{fig:buffer20rtt}, \ref{fig:buffer20download} both faster download time and shorter RTT. Also comparing Figures \ref{fig:buffer5cwnd}, \ref{fig:buffer20cwnd}, \ref{fig:buffer100cwnd} show that as the queue size increase, TCP congestion avoidance algorithm is stepping in less and less. 
+
+
+%When the queue size is 5, since the buffer is too small, packets get dropped frequently, and this is causing both a high delay and a high variance in this case. On the contrary when the max queue size is 100, the buffer size is too big, and this is causing bufferbloat to happen. Figure \ref{fig:buffer100q} illustrates that this big buffer is frequently (unnecessarily) full and seldomly empty, indicating the bufferbloat problem is occurring. When the max buffer size is 20, however, the buffer is neither too big nor too small; we see the lowest mean fetch time and standard deviation in all three experiments in this case. 
 
 Ipconfig reports a maximum queue length of \texttt{txqueuelen:1000} packets, and a MTU of 1500 bytes. Then, if we have a saturated buffer, we need
 \begin{equation}
 	(1000 \times 1500 \times 8) / (100 \times 10^6) = 0.12\, \mathrm{second}
 \end{equation}
 
-Figure \ref{fig:rtt q relationship} shows\footnote{This plot is generated with my script \texttt{plot\_relationship.py} available in the same directory as all the other plot python files. It is also automatically invoked in my modified version of \texttt{run.sh} script. You will need NumPy and Scipy.stats to run this script, I used them for the fitting of linear regression model.} the three data points that we have, which are pairs of queue size and the average RTT time taken reported by ping. On the plot, the coordinates are marked as text next to the data points. We than fit a linear regression model to our three data points, and then the fitted line is plotted on the same plot. We have reason to believe, with some allowance for error, that the relationship is linear and can be described as
+Figure \ref{fig:rtt q relationship} shows\footnote{This plot is generated with my script \texttt{plot\_relationship.py}. However, since I can't submit the file on Markus, I will add it to the appendix of this write up. You will need NumPy and Scipy.stats to run this script, I used them for the fitting of linear regression model.} the three data points that we have, which are pairs of queue size and the average RTT time taken reported by ping. On the plot, the coordinates are marked as text next to the data points. We than fit a linear regression model to our three data points, and then the fitted line is plotted on the same plot. In my case, the fitted line is described algebraically as
 \begin{equation}
-	\mathrm{RTT (ms)} = 2 \times \mathrm{queue Size}
+	\mathrm{RTT (ms)} =  1.71 \times \mathrm{queue Size} + 6
 \end{equation}
+Also notice that the $p-value$ is very close to zero, $r$ is 1, and the standard error is also very close to zero. This means that we are statistically confident that the linear relationship is described well with our fitted model. 
 
 For the sake of mitigating the bufferbloat problem, we can try 
 \begin{itemize}
@@ -162,12 +172,75 @@ For the sake of mitigating the bufferbloat problem, we can try
 	\item Use a delay based congestion avoidance algorithm rather than packet drop based. \cite{sivov12} In this way, if the delay is too high we know that the packet might have been buffered somewhere, signalling a congestion. We can then control the cwnd size based on this information
 \end{itemize}
 
-\begin{figure}[H]
-	\center\includegraphics[width=0.9\textwidth]{../fit}
+\begin{figure}[]
+	\center\includegraphics[width=0.7\textwidth]{../fit}
 	\captionsetup{format=hang}
-	\caption{\label{fig:rtt q relationship}Scatter plot of RTT (in ms) and the max queue size used respectively. Plotted with the fitted line via linear regression. This plot is generated with my script \texttt{plot\_relationship.py} available in the same directory as all the other plot python files. It is also automatically invoked in my modified version of \texttt{run.sh} script. You will need NumPy and Scipy.stats to run this script, I used them for the fitting of linear regression model. }
+	\caption{\label{fig:rtt q relationship}Scatter plot of RTT (in ms) and the max queue size used respectively. This plot is generated with my script \texttt{plot\_relationship.py}. However, since I can't submit the file on Markus, I will add it to the appendix of this write up. You will need NumPy and Scipy.stats to run this script, I used them for the fitting of linear regression model.}
 \end{figure}
-%\newpage
+
+\section*{Appendix Code} Figure \ref{code} is the code used to produce Figure \ref{fig:rtt q relationship}. 
+\begin{figure}[H]
+\center
+\begin{tcolorbox}[title=Source Code \texttt{plot\_relationship.py}]
+  %add special color box to list of listings
+  \makeatletter
+  \addcontentsline{lol}{subsection}{\kvtcb@title}
+  \makeatother
+
+\begin{multicols}{2}
+	\begin{minted}[fontsize=\tiny]{python}
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
+
+def get_ping_vals(filename):
+	with open(filename, 'r') as f:
+	    lines = f.readlines()
+	    ret = []
+	    num = 0
+	    for line in lines:
+	        if 'bytes from' not in line:
+	            continue
+	        try:
+	            rtt = line.split(' ')[-2]
+	            rtt = rtt.split('=')[1]
+	            rtt = float(rtt)
+	            ret.append(rtt)
+	        except:
+	            break
+	    return np.array(ret)
+
+plt.figure(figsize=(8, 6))
+# plt.style.use("seaborn")
+qs = np.array([5, 20, 100])
+filenames = ["./bb-q5/ping.txt", "./bb-q20/ping.txt", "./bb-q100/ping.txt"]
+rtts = np.array([np.mean(get_ping_vals(i)) for i in filenames])
+
+slope, intercept, r_value, p_value, std_err = stats.linregress(qs, rtts)
+plt.scatter(qs, rtts, s=100, label="Observations")
+for x, y in zip(qs, rtts):
+text = '(' + str(x) + ', {:.2f})'.format(y)
+plt.text(x - 10, y - 10, text)
+
+plt.plot(
+np.arange(0, 101), 
+np.arange(0, 101) * slope + intercept, 
+label="Fitted Line via Linear Regression \n$RTT$" + 
+      "$= {:.2f} + {:.2f} \\times qsize$\np-val = {:.2f}, r = {:.2f}, stderr = {:.2f}".format(
+          intercept, slope, p_value, r_value, std_err)
+)
+
+plt.title("Relatinship between RTT and Queue size", size=18)
+plt.xlabel("queue size", size=14)
+plt.ylabel("rtt time in average (ms)", size=14)
+plt.legend(loc="best")
+plt.savefig("./fit.pdf")
+	\end{minted}
+\end{multicols}
+\end{tcolorbox}
+\captionsetup{format=hang, singlelinecheck=false}
+\caption{\label{code}Appendix Code, \texttt{plot\_relationship.py}. I was not able to include this file to MarkUs submission, so I am including it here in Appendix. It produces Figure \ref{fig:rtt q relationship}.}
+\end{figure}
 \bibliographystyle{apalike}
 \bibliography{bib.bib}
 

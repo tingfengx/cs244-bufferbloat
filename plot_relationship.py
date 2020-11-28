@@ -30,11 +30,13 @@ plt.scatter(qs, rtts, s=100, label="Observations")
 for x, y in zip(qs, rtts):
     text = '(' + str(x) + ', {:.2f})'.format(y)
     plt.text(x - 10, y - 10, text)
-
+ 
 plt.plot(
     np.arange(0, 101), 
     np.arange(0, 101) * slope + intercept, 
-    label="Fitted Line via Linear Regression \n$RTT = {:.2f} + {:.2f} \\times qsize$\np-val = {:.2f}, r = {:.2f}, stderr = {:.2f}".format(intercept, slope, p_value, r_value, std_err)
+    label="Fitted Line via Linear Regression \n$RTT$" + 
+          "$= {:.2f} + {:.2f} \\times qsize$\np-val = {:.2f}, r = {:.2f}, stderr = {:.2f}".format(
+              intercept, slope, p_value, r_value, std_err)
 )
 
 plt.title("Relatinship between RTT and Queue size", size=18)
