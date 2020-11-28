@@ -177,8 +177,10 @@ def bufferbloat():
     # number may be 1 or 2.  Ensure you use the correct number.
     # FIXME: h1 h1-eth0:s0-eth1
     #        h2 h2-eth0:s0-eth2
-    qmon = start_qmon(iface='s0-eth2',
-                      outfile='%s/q.txt' % (args.dir))
+    qmon = start_qmon(
+        iface='s0-eth2',
+        outfile='%s/q.txt' % (args.dir)
+    )
     # qmon = None
 
     # TODO: Start iperf, webservers, etc.
@@ -214,7 +216,7 @@ def bufferbloat():
         )
         # note: communicate()[0] here will hurt the performance
         popens.append(popen)
-        sleep(1)
+        sleep(2) # doing every two seconds. 
         now = time()
         delta = now - start_time
         if delta > args.time:
