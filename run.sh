@@ -28,8 +28,10 @@ for qsize in 5 20 100; do
     # the required naming convsention when submitting your tarball.
     python plot_tcpprobe.py -f $dir/cwnd.txt -o $dir/cwnd-iperf.png -p $iperf_port
     python plot_queue.py -f $dir/q.txt -o $dir/q.png
-    python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png
-    python plot_download_time.py -f $dir/download.txt -o $dir/download.png
+    python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png -df $dir/download.txt -do $dir/download.png
 done
+
 # finally do the following (plotting the relationship between RTT and qsize)
-python plot_relationship.py
+# sorry that I can't upload this file, it was not listed on markus
+# but you can see the code in my report in appendix, also the output is in the report :) 
+# python plot_relationship.py

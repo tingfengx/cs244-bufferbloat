@@ -14,9 +14,10 @@ cp bufferbloat.py submit_files/bufferbloat.py
 cp plot_queue.py submit_files/plot_queue.py
 cp plot_ping.py submit_files/plot_ping.py
 cp plot_tcpprobe.py submit_files/plot_tcpprobe.py
-cp plot_relationship.py submit_files/plot_relationship.py
-cp plot_download_time.py submit_files/plot_download_time.py
 
-cp fit.pdf submit_files/fit.pdf
+# following three not required on markus, so have to omit
+# cp plot_relationship.py submit_files/plot_relationship.py
+# cp plot_download_time.py submit_files/plot_download_time.py
+# cp fit.pdf submit_files/fit.pdf
 
 cp run.sh submit_files/run.sh
