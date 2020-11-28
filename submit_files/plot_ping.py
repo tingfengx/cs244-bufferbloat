@@ -103,7 +103,7 @@ for i, f in enumerate(args.dfiles):
 plt.ylabel("(curl) Download Time (ms)")
 plt.grid(True)
 
-if args.out:
+if args.dout:
     plt.savefig(args.dout)
 else:
     plt.show()
